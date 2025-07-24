@@ -30,11 +30,11 @@ export const parseWhatsAppInquiry = (text) => {
   }
 
   // Extract dates
-  const datePatterns = [
-    /(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/g,
+const datePatterns = [
+    /(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})/g,
     /(\d{1,2})(?:st|nd|rd|th)?\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\w*\s*(\d{2,4})?/gi,
-    /(?:from|check[\s-]?in)[\s:]*(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.]?(\d{2,4})?/i,
-    /(?:to|check[\s-]?out)[\s:]*(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.]?(\d{2,4})?/i
+    /(?:from|check[\s-]?in)[\s:]*(\d{1,2})[/\-.](\d{1,2})[/\-.]?(\d{2,4})?/i,
+    /(?:to|check[\s-]?out)[\s:]*(\d{1,2})[/\-.](\d{1,2})[/\-.]?(\d{2,4})?/i
   ]
 
   const dates = []
