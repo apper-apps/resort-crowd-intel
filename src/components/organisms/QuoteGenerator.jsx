@@ -1,19 +1,19 @@
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { toast } from "react-toastify"
-import Card from "@/components/atoms/Card"
-import Button from "@/components/atoms/Button"
-import Input from "@/components/atoms/Input"
-import Select from "@/components/atoms/Select"
-import Textarea from "@/components/atoms/Textarea"
-import ApperIcon from "@/components/ApperIcon"
-import RoomCard from "@/components/organisms/RoomCard"
-import PricingCalculator from "@/components/organisms/PricingCalculator"
-import WhatsAppParser from "@/components/organisms/WhatsAppParser"
-import { tariffService } from "@/services/api/tariffService"
-import { leadService } from "@/services/api/leadService"
-import { calculateQuoteTotals } from "@/utils/pricing"
-import { generateQuoteText } from "@/utils/quoteGenerator"
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import { generateQuoteText } from "@/utils/quoteGenerator";
+import { calculateQuoteTotals } from "@/utils/pricing";
+import { tariffService } from "@/services/api/tariffService";
+import { leadService } from "@/services/api/leadService";
+import ApperIcon from "@/components/ApperIcon";
+import RoomCard from "@/components/organisms/RoomCard";
+import PricingCalculator from "@/components/organisms/PricingCalculator";
+import WhatsAppParser from "@/components/organisms/WhatsAppParser";
+import Select from "@/components/atoms/Select";
+import Card from "@/components/atoms/Card";
+import Input from "@/components/atoms/Input";
+import Button from "@/components/atoms/Button";
+import Textarea from "@/components/atoms/Textarea";
 
 const QuoteGenerator = ({ onLeadCreated }) => {
   const [formData, setFormData] = useState({
@@ -177,21 +177,50 @@ const QuoteGenerator = ({ onLeadCreated }) => {
           notes: formData.notes
         })
         await leadService.addQuote(newLead.Id, quoteData)
-        toast.success("Quote generated and lead created!")
+toast.success("Quote generated and lead created!")
         if (onLeadCreated) onLeadCreated()
       }
-
-      // Copy quote to clipboard
-      navigator.clipboard.writeText(quoteText)
-      toast.info("Quote copied to clipboard!")
+      // Copy quote to clipboard with fallback
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          // Modern Clipboard API
+          await navigator.clipboard.writeText(quoteText)
+          toast.info("Quote copied to clipboard!")
+        } else {
+          // Fallback for older browsers or insecure contexts
+          const textArea = document.createElement('textarea')
+          textArea.value = quoteText
+          textArea.style.position = 'fixed'
+          textArea.style.left = '-999999px'
+          textArea.style.top = '-999999px'
+          document.body.appendChild(textArea)
+          textArea.focus()
+          textArea.select()
+          
+          try {
+            const successful = document.execCommand('copy')
+            if (successful) {
+              toast.info("Quote copied to clipboard!")
+            } else {
+              toast.warning("Quote generated successfully! Please copy manually if needed.")
+            }
+          } catch (err) {
+            toast.warning("Quote generated successfully! Clipboard access unavailable.")
+          } finally {
+            document.body.removeChild(textArea)
+          }
+        }
+      } catch (clipboardError) {
+        // Clipboard failed but quote was generated successfully
+        toast.warning("Quote generated successfully! Clipboard access unavailable.")
+      }
       
     } catch (error) {
       toast.error("Failed to generate quote")
-    } finally {
+} finally {
       setIsLoading(false)
     }
   }
-
   const clearForm = () => {
     setFormData({
       clientName: "",
