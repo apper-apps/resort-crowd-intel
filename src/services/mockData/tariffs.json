@@ -1,0 +1,82 @@
+{
+  "tariffs": [
+    {
+      "roomType": "Standard",
+      "seasonRates": [
+        {
+          "season": "Peak",
+          "startMonth": 12,
+          "endMonth": 2,
+          "rate": 4500
+        },
+        {
+          "season": "High",
+          "startMonth": 3,
+          "endMonth": 5,
+          "rate": 3500
+        },
+        {
+          "season": "Regular",
+          "startMonth": 6,
+          "endMonth": 11,
+          "rate": 2500
+        }
+      ],
+      "acCharges": 500,
+      "extraAdultCharge": 800,
+      "childCharge": 400
+    },
+    {
+      "roomType": "Deluxe",
+      "seasonRates": [
+        {
+          "season": "Peak",
+          "startMonth": 12,
+          "endMonth": 2,
+          "rate": 6500
+        },
+        {
+          "season": "High",
+          "startMonth": 3,
+          "endMonth": 5,
+          "rate": 5500
+        },
+        {
+          "season": "Regular",
+          "startMonth": 6,
+          "endMonth": 11,
+          "rate": 4500
+        }
+      ],
+      "acCharges": 500,
+      "extraAdultCharge": 1000,
+      "childCharge": 500
+    },
+    {
+      "roomType": "Super Deluxe",
+      "seasonRates": [
+        {
+          "season": "Peak",
+          "startMonth": 12,
+          "endMonth": 2,
+          "rate": 8500
+        },
+        {
+          "season": "High",
+          "startMonth": 3,
+          "endMonth": 5,
+          "rate": 7500
+        },
+        {
+          "season": "Regular",
+          "startMonth": 6,
+          "endMonth": 11,
+          "rate": 6500
+        }
+      ],
+      "acCharges": 500,
+      "extraAdultCharge": 1200,
+      "childCharge": 600
+    }
+  ]
+}

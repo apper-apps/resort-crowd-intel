@@ -1,0 +1,77 @@
+{
+  "leads": [
+    {
+      "Id": 1,
+      "name": "Rajesh Sharma",
+      "mobile": "9876543210",
+      "checkinDate": "2024-03-15T00:00:00.000Z",
+      "checkoutDate": "2024-03-17T00:00:00.000Z",
+      "status": "contacted",
+      "quotes": [
+        {
+          "Id": 1,
+          "createdAt": "2024-01-15T10:30:00.000Z",
+          "rooms": [
+            {
+              "type": "Deluxe",
+              "adults": 2,
+              "children": 1,
+              "infants": 0,
+              "hasAC": true,
+              "nightlyDiscounts": [0, 0],
+              "pets": 0
+            }
+          ],
+          "mealPlans": ["CP"],
+          "totalAmount": 14500,
+          "advanceAmount": 5000,
+          "quoteText": "Quote for 2 nights stay..."
+        }
+      ],
+      "reminderDateTimeUTC": "2024-01-18T09:00:00.000Z",
+      "notes": "Family trip, interested in room upgrade"
+    },
+    {
+      "Id": 2,
+      "name": "Priya Patel",
+      "mobile": "9123456789",
+      "checkinDate": "2024-04-20T00:00:00.000Z",
+      "checkoutDate": "2024-04-22T00:00:00.000Z",
+      "status": "negotiation",
+      "quotes": [],
+      "reminderDateTimeUTC": "2024-01-20T14:00:00.000Z",
+      "notes": "Corporate booking, needs invoice"
+    },
+    {
+      "Id": 3,
+      "name": "Amit Kumar",
+      "mobile": "9876501234",
+      "checkinDate": "2024-05-10T00:00:00.000Z",
+      "checkoutDate": "2024-05-12T00:00:00.000Z",
+      "status": "won",
+      "quotes": [
+        {
+          "Id": 2,
+          "createdAt": "2024-01-10T16:45:00.000Z",
+          "rooms": [
+            {
+              "type": "Standard",
+              "adults": 2,
+              "children": 0,
+              "infants": 0,
+              "hasAC": false,
+              "nightlyDiscounts": [10, 10],
+              "pets": 0
+            }
+          ],
+          "mealPlans": ["MAP"],
+          "totalAmount": 8900,
+          "advanceAmount": 3000,
+          "quoteText": "Budget-friendly package..."
+        }
+      ],
+      "reminderDateTimeUTC": null,
+      "notes": "Payment completed, confirmation sent"
+    }
+  ]
+}
