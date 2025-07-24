@@ -166,7 +166,7 @@ export const tariffService = {
   },
 
   // Helper method to parse season rates from database storage format
-  parseSeasonRates(seasonRatesString) {
+parseSeasonRates(seasonRatesString) {
     try {
       if (!seasonRatesString) return [];
       
@@ -175,10 +175,72 @@ export const tariffService = {
         return seasonRatesString;
       }
       
-      // Try to parse as JSON
-      return JSON.parse(seasonRatesString);
+      // Try to parse as JSON first
+      try {
+        return JSON.parse(seasonRatesString);
+      } catch (jsonError) {
+        // If JSON parsing fails, try to parse as plain text format
+        console.log("JSON parsing failed, attempting text format parsing:", jsonError.message);
+        
+        // Handle text format like "Peak: 4500, High: 3500, Regular: 2500"
+        if (typeof seasonRatesString === 'string') {
+          const seasonRates = [];
+          
+          // Split by comma and parse each season
+          const seasonPairs = seasonRatesString.split(',').map(pair => pair.trim());
+          
+          for (const pair of seasonPairs) {
+            const colonIndex = pair.indexOf(':');
+            if (colonIndex > 0) {
+              const season = pair.substring(0, colonIndex).trim();
+              const rateStr = pair.substring(colonIndex + 1).trim();
+              const rate = parseFloat(rateStr);
+              
+              if (season && !isNaN(rate)) {
+                // Map season names to typical month ranges
+                let startMonth, endMonth;
+                switch (season.toLowerCase()) {
+                  case 'peak':
+                    startMonth = 12;
+                    endMonth = 2;
+                    break;
+                  case 'high':
+                    startMonth = 3;
+                    endMonth = 5;
+                    break;
+                  case 'regular':
+                  case 'low':
+                    startMonth = 6;
+                    endMonth = 11;
+                    break;
+                  default:
+                    // Default to regular season if unknown
+                    startMonth = 6;
+                    endMonth = 11;
+                }
+                
+                seasonRates.push({
+                  season: season,
+                  startMonth: startMonth,
+                  endMonth: endMonth,
+                  rate: rate
+                });
+              }
+            }
+          }
+          
+          if (seasonRates.length > 0) {
+            console.log("Successfully parsed text format season rates:", seasonRates);
+            return seasonRates;
+          }
+        }
+        
+        // If text parsing also fails, throw the original JSON error
+        throw jsonError;
+      }
     } catch (error) {
       console.error("Error parsing season rates:", error);
+      console.error("Raw season rates data:", seasonRatesString);
       return [];
     }
   },
