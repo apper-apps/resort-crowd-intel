@@ -7,7 +7,7 @@ import LeadsList from "@/components/organisms/LeadsList"
 import BookingConfirmations from "@/components/organisms/BookingConfirmations"
 import ApperIcon from "@/components/ApperIcon"
 import Button from "@/components/atoms/Button"
-import { AuthContext } from "../App"
+import { AuthContext } from "@/App"
 
 const HomePage = () => {
   const [activeTab, setActiveTab] = useState("quotes")
