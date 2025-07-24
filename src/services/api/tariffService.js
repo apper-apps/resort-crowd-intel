@@ -1,31 +1,203 @@
-import tariffsData from "@/services/mockData/tariffs.json"
+const { ApperClient } = window.ApperSDK;
 
-let tariffs = [...tariffsData.tariffs]
+// Initialize ApperClient
+const apperClient = new ApperClient({
+  apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+  apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+});
 
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+const tableName = 'tariff';
 
 export const tariffService = {
   async getAll() {
-    await delay(200)
-    return [...tariffs]
+    try {
+      const params = {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "room_type" } },
+          { field: { Name: "season_rates" } },
+          { field: { Name: "ac_charges" } },
+          { field: { Name: "extra_adult_charge" } },
+          { field: { Name: "child_charge" } }
+        ]
+      };
+
+      const response = await apperClient.fetchRecords(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      // Transform database fields to match UI expectations
+      const transformedTariffs = response.data.map(tariff => ({
+        roomType: tariff.room_type,
+        seasonRates: this.parseSeasonRates(tariff.season_rates),
+        acCharges: tariff.ac_charges,
+        extraAdultCharge: tariff.extra_adult_charge,
+        childCharge: tariff.child_charge
+      }));
+
+      return transformedTariffs;
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error fetching tariffs:", error?.response?.data?.message);
+      } else {
+        console.error("Error fetching tariffs:", error.message);
+      }
+      return [];
+    }
   },
 
   async getByRoomType(roomType) {
-    await delay(150)
-    const tariff = tariffs.find(t => t.roomType === roomType)
-    if (!tariff) {
-      throw new Error("Tariff not found for room type")
+    try {
+      const params = {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "room_type" } },
+          { field: { Name: "season_rates" } },
+          { field: { Name: "ac_charges" } },
+          { field: { Name: "extra_adult_charge" } },
+          { field: { Name: "child_charge" } }
+        ],
+        where: [
+          {
+            FieldName: "room_type",
+            Operator: "EqualTo",
+            Values: [roomType]
+          }
+        ]
+      };
+
+      const response = await apperClient.fetchRecords(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (!response.data || response.data.length === 0) {
+        throw new Error("Tariff not found for room type");
+      }
+
+      const tariff = response.data[0];
+      return {
+        roomType: tariff.room_type,
+        seasonRates: this.parseSeasonRates(tariff.season_rates),
+        acCharges: tariff.ac_charges,
+        extraAdultCharge: tariff.extra_adult_charge,
+        childCharge: tariff.child_charge
+      };
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error(`Error fetching tariff for room type ${roomType}:`, error?.response?.data?.message);
+      } else {
+        console.error(`Error fetching tariff for room type ${roomType}:`, error.message);
+      }
+      throw error;
     }
-    return { ...tariff }
   },
 
   async update(roomType, tariffData) {
-    await delay(300)
-    const index = tariffs.findIndex(t => t.roomType === roomType)
-    if (index === -1) {
-      throw new Error("Tariff not found")
+    try {
+      // First find the record by room type
+      const existingTariffs = await this.getAll();
+      const existingTariff = existingTariffs.find(t => t.roomType === roomType);
+      
+      if (!existingTariff) {
+        throw new Error("Tariff not found");
+      }
+
+      const params = {
+        records: [
+          {
+            room_type: roomType,
+            season_rates: this.stringifySeasonRates(tariffData.seasonRates),
+            ac_charges: tariffData.acCharges,
+            extra_adult_charge: tariffData.extraAdultCharge,
+            child_charge: tariffData.childCharge
+          }
+        ]
+      };
+
+      const response = await apperClient.updateRecord(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const successfulUpdates = response.results.filter(result => result.success);
+        const failedUpdates = response.results.filter(result => !result.success);
+        
+        if (failedUpdates.length > 0) {
+          console.error(`Failed to update tariff ${failedUpdates.length} records:${JSON.stringify(failedUpdates)}`);
+          
+          failedUpdates.forEach(record => {
+            record.errors?.forEach(error => {
+              throw new Error(`${error.fieldLabel}: ${error.message}`);
+            });
+            if (record.message) throw new Error(record.message);
+          });
+        }
+
+        if (successfulUpdates.length > 0) {
+          const updatedTariff = successfulUpdates[0].data;
+          return {
+            roomType: updatedTariff.room_type,
+            seasonRates: this.parseSeasonRates(updatedTariff.season_rates),
+            acCharges: updatedTariff.ac_charges,
+            extraAdultCharge: updatedTariff.extra_adult_charge,
+            childCharge: updatedTariff.child_charge
+          };
+        }
+      }
+      
+      throw new Error("Failed to update tariff");
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error updating tariff:", error?.response?.data?.message);
+      } else {
+        console.error("Error updating tariff:", error.message);
+      }
+      throw error;
     }
-    tariffs[index] = { ...tariffs[index], ...tariffData }
-    return { ...tariffs[index] }
+  },
+
+  // Helper method to parse season rates from database storage format
+  parseSeasonRates(seasonRatesString) {
+    try {
+      if (!seasonRatesString) return [];
+      
+      // If it's already an object/array, return as is
+      if (typeof seasonRatesString === 'object') {
+        return seasonRatesString;
+      }
+      
+      // Try to parse as JSON
+      return JSON.parse(seasonRatesString);
+    } catch (error) {
+      console.error("Error parsing season rates:", error);
+      return [];
+    }
+  },
+
+  // Helper method to stringify season rates for database storage
+  stringifySeasonRates(seasonRates) {
+    try {
+      if (!seasonRates) return '';
+      
+      // If it's already a string, return as is
+      if (typeof seasonRates === 'string') {
+        return seasonRates;
+      }
+      
+      // Convert to JSON string
+      return JSON.stringify(seasonRates);
+    } catch (error) {
+      console.error("Error stringifying season rates:", error);
+      return '';
+    }
   }
 }

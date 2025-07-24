@@ -1,16 +1,16 @@
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { toast } from "react-toastify"
-import Card from "@/components/atoms/Card"
-import Button from "@/components/atoms/Button"
-import Input from "@/components/atoms/Input"
-import Textarea from "@/components/atoms/Textarea"
-import Badge from "@/components/atoms/Badge"
-import ApperIcon from "@/components/ApperIcon"
-import Loading from "@/components/ui/Loading"
-import Empty from "@/components/ui/Empty"
-import { leadService } from "@/services/api/leadService"
-import { format } from "date-fns"
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import { format } from "date-fns";
+import { leadService } from "@/services/api/leadService";
+import ApperIcon from "@/components/ApperIcon";
+import Badge from "@/components/atoms/Badge";
+import Card from "@/components/atoms/Card";
+import Input from "@/components/atoms/Input";
+import Button from "@/components/atoms/Button";
+import Textarea from "@/components/atoms/Textarea";
+import Empty from "@/components/ui/Empty";
+import Loading from "@/components/ui/Loading";
 
 const BookingConfirmations = () => {
   const [wonLeads, setWonLeads] = useState([])
@@ -23,19 +23,18 @@ const BookingConfirmations = () => {
     loadWonLeads()
   }, [])
 
-  const loadWonLeads = async () => {
+const loadWonLeads = async () => {
     setLoading(true)
     try {
       const allLeads = await leadService.getAll()
       const won = allLeads.filter(lead => lead.status === "won")
       setWonLeads(won)
     } catch (error) {
-      toast.error("Failed to load booking confirmations")
+      toast.error(error.message || "Failed to load booking confirmations")
     } finally {
       setLoading(false)
     }
   }
-
   const generateConfirmationText = (lead, quote, advance) => {
     const checkinDate = format(new Date(lead.checkinDate), "dd MMM yyyy")
     const checkoutDate = format(new Date(lead.checkoutDate), "dd MMM yyyy")

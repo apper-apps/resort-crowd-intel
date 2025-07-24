@@ -1,14 +1,19 @@
-import { useState } from "react"
+import { useState, useContext } from "react"
 import { motion } from "framer-motion"
+import { useSelector } from 'react-redux'
 import TabNavigation from "@/components/molecules/TabNavigation"
 import QuoteGenerator from "@/components/organisms/QuoteGenerator"
 import LeadsList from "@/components/organisms/LeadsList"
 import BookingConfirmations from "@/components/organisms/BookingConfirmations"
 import ApperIcon from "@/components/ApperIcon"
+import Button from "@/components/atoms/Button"
+import { AuthContext } from "../App"
 
 const HomePage = () => {
   const [activeTab, setActiveTab] = useState("quotes")
   const [leadsRefreshTrigger, setLeadsRefreshTrigger] = useState(0)
+  const { user } = useSelector((state) => state.user)
+  const { logout } = useContext(AuthContext)
 
   const tabs = [
     {
@@ -67,7 +72,7 @@ const HomePage = () => {
                 </h1>
                 <p className="text-sm text-slate-600">Grand Resort Mahabaleshwar</p>
               </div>
-            </div>
+</div>
 
             <div className="flex items-center space-x-4">
               <div className="text-right">
@@ -81,6 +86,19 @@ const HomePage = () => {
                   })}
                 </div>
               </div>
+              
+              {user && (
+                <div className="flex items-center space-x-3">
+                  <div className="text-right">
+                    <div className="font-medium text-primary">{user.firstName} {user.lastName}</div>
+                    <div className="text-xs text-slate-500">{user.emailAddress}</div>
+                  </div>
+                  <Button onClick={logout} variant="ghost" size="sm">
+                    <ApperIcon name="LogOut" className="w-4 h-4 mr-2" />
+                    Logout
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>

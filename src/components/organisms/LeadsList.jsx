@@ -38,10 +38,10 @@ const LeadsList = ({ refreshTrigger }) => {
     setLoading(true)
     setError("")
     try {
-      const leadsData = await leadService.getAll()
+const leadsData = await leadService.getAll()
       setLeads(leadsData.sort((a, b) => new Date(b.reminderDateTimeUTC || 0) - new Date(a.reminderDateTimeUTC || 0)))
     } catch (err) {
-      setError(err.message)
+      setError(err.message || "Failed to load leads")
     } finally {
       setLoading(false)
     }
@@ -93,27 +93,31 @@ const LeadsList = ({ refreshTrigger }) => {
     setFilteredLeads(filtered)
   }
 
-  const handleStatusUpdate = async (leadId, newStatus) => {
+const handleStatusUpdate = async (leadId, newStatus) => {
     try {
-      await leadService.updateStatus(leadId, newStatus)
+      const updatedLead = await leadService.updateStatus(leadId, newStatus)
       setLeads(prev => prev.map(lead => 
-        lead.Id === leadId ? { ...lead, status: newStatus } : lead
+        lead.Id === leadId ? updatedLead : lead
       ))
       toast.success(`Lead status updated to ${newStatus}`)
     } catch (error) {
-      toast.error("Failed to update lead status")
+      toast.error(error.message || "Failed to update lead status")
     }
   }
 
-  const handleDeleteLead = async (leadId) => {
+const handleDeleteLead = async (leadId) => {
     if (!window.confirm("Are you sure you want to delete this lead?")) return
 
     try {
-      await leadService.delete(leadId)
-      setLeads(prev => prev.filter(lead => lead.Id !== leadId))
-      toast.success("Lead deleted successfully")
+      const deleted = await leadService.delete(leadId)
+      if (deleted) {
+        setLeads(prev => prev.filter(lead => lead.Id !== leadId))
+        toast.success("Lead deleted successfully")
+      } else {
+        toast.error("Failed to delete lead")
+      }
     } catch (error) {
-      toast.error("Failed to delete lead")
+      toast.error(error.message || "Failed to delete lead")
     }
   }
 

@@ -51,12 +51,12 @@ const QuoteGenerator = ({ onLeadCreated }) => {
     }
   }, [formData, tariffs])
 
-  const loadTariffs = async () => {
+const loadTariffs = async () => {
     try {
       const tariffsData = await tariffService.getAll()
       setTariffs(tariffsData)
     } catch (error) {
-      toast.error("Failed to load tariffs")
+      toast.error(error.message || "Failed to load tariffs")
     }
   }
 
@@ -168,7 +168,7 @@ const QuoteGenerator = ({ onLeadCreated }) => {
         await leadService.addQuote(existingLead.Id, quoteData)
         toast.success("Quote added to existing lead!")
       } else {
-        // Create new lead
+// Create new lead
         const newLead = await leadService.create({
           name: formData.clientName,
           mobile: formData.mobile,
@@ -177,7 +177,7 @@ const QuoteGenerator = ({ onLeadCreated }) => {
           notes: formData.notes
         })
         await leadService.addQuote(newLead.Id, quoteData)
-toast.success("Quote generated and lead created!")
+        toast.success("Quote generated and lead created!")
         if (onLeadCreated) onLeadCreated()
       }
       // Copy quote to clipboard with fallback
@@ -214,10 +214,9 @@ toast.success("Quote generated and lead created!")
         // Clipboard failed but quote was generated successfully
         toast.warning("Quote generated successfully! Clipboard access unavailable.")
       }
-      
-    } catch (error) {
-      toast.error("Failed to generate quote")
-} finally {
+} catch (error) {
+      toast.error(error.message || "Failed to generate quote")
+    } finally {
       setIsLoading(false)
     }
   }
